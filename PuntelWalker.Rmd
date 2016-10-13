@@ -31,3 +31,15 @@ colnames(marvel)[13]<-"YEAR" #Change last column to YEAR in Marvel to match YEAR
 dc$publisher<-"DC" #Add publisher col
 marvel$publisher<-"Marvel" #Add publisher col
 df<-rbind(dc, marvel) #Bind both tables into one data frame
+
+
+
+summary(df$SEX)
+
+df %>%
+  group_by(YEAR) %>%
+  summarise(females = count(SEX)) %>% 
+  tail(2)
+
+
+
