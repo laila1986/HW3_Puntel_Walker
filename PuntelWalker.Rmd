@@ -3,8 +3,8 @@ title: 'HW3: Elektra vs. Catwoman, a.k.a. Gender in Comics'
 author: "Laila Puntel and Victoria Walker"
 date: "October 14, 2016"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ## Prompt
@@ -22,12 +22,34 @@ The data come from [Marvel Wikia](http://marvel.wikia.com/Main_Page) and [DC Wik
 - Does the company (DC vs. Marvel) have and effect?
 - What can you say about "good characters" vs. "villains" in regards to their characteristics, gender, the company, over time?
 
+```{r}
+#load required packages
+library(ggplot2)
+```
 
+## Read in data
 
-# working directory is project (HW3) base
+The first step is to read in the Marvel and DC data and combine into a single data frame. Code is run with the working directory as the project (HW3) base folder.
+
+```{r}
 marvel<-read.csv("data/marvel-wikia-data.csv") #Read Marvel data
 dc<-read.csv("data/dc-wikia-data.csv") #Read DC data
 colnames(marvel)[13]<-"YEAR" #Change last column to YEAR in Marvel to match YEAR in DC
 dc$publisher<-"DC" #Add publisher col
 marvel$publisher<-"Marvel" #Add publisher col
 df<-rbind(dc, marvel) #Bind both tables into one data frame
+```
+
+## Are gender and appearences related?
+
+One pattern around gender that could be interesting is how frequently different genders appear. As the characters have been released for varying amounts of time the number of appearances will be normalized by how long they've been in the comics. The current year (2016) will be used to calculate years since a character's first appearance.
+
+```{r}
+norm<-df$APPEARANCES/(2016-df$YEAR)
+
+sc<-qplot(df$SEX[df$SEX!=""], norm[df$SEX!=""], color=df$SEX[df$SEX!=""],
+      xlab="Gender", ylab="Normalized Appearances")
+sc + theme(axis.ticks = element_blank(), axis.text.x = element_blank(), legend.title=element_blank())
+```
+
+When normalized to the date of their first appearances, male characters appear most in the comics. This index highlights predominant characters as outliers. The majority of characters appear infrequently, regardless of gender. These are likely characters who serve a minor role in only a few (or a single) comic.
