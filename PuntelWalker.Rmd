@@ -24,9 +24,9 @@ The data come from [Marvel Wikia](http://marvel.wikia.com/Main_Page) and [DC Wik
 
 
 
-
-marvel<-read.csv("marvel-wikia-data.csv") #Read Marvel data
-dc<-read.csv("dc-wikia-data.csv") #Read DC data
+# working directory is project (HW3) base
+marvel<-read.csv("data/marvel-wikia-data.csv") #Read Marvel data
+dc<-read.csv("data/dc-wikia-data.csv") #Read DC data
 colnames(marvel)[13]<-"YEAR" #Change last column to YEAR in Marvel to match YEAR in DC
 dc$publisher<-"DC" #Add publisher col
 marvel$publisher<-"Marvel" #Add publisher col
