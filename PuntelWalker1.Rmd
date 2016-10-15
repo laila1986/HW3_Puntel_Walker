@@ -25,6 +25,8 @@ The data come from [Marvel Wikia](http://marvel.wikia.com/Main_Page) and [DC Wik
 ```{r}
 #load required packages
 library(ggplot2)
+library (dplyr)
+
 ```
 
 ## Read in data
@@ -35,9 +37,128 @@ The first step is to read in the Marvel and DC data and combine into a single da
 marvel<-read.csv("data/marvel-wikia-data.csv") #Read Marvel data
 dc<-read.csv("data/dc-wikia-data.csv") #Read DC data
 colnames(marvel)[13]<-"YEAR" #Change last column to YEAR in Marvel to match YEAR in DC
-dc$publisher<-"DC" #Add publisher col
-marvel$publisher<-"Marvel" #Add publisher col
-master<-rbind(dc, marvel) #Bind both tables into one data frame
+dc$publisher<-"DC" #Add publisher
+marvel$publisher<-"Marvel" #Add publisher 
+master<-rbind(dc, marvel) #Combine both tables into one data frame
+```
+
+##Summary of the data by Gender 
+
+From the table below we can see that prior to any deep analysis that female characters seem to be lower than male in both companies. Each of the companies have roughly 2 times as many male characters as female characters.
+
+```{r}
+res1<-master %>%
+  group_by(publisher, SEX) %>%
+  summarise(Count= length(SEX))
+```  
+
+```{r, echo=FALSE}
+knitr::kable(res1)
+```
+
+We created this subset of data to look at differences between Female and Male genders.
+
+```{r}
+sub_master<-subset(master, SEX %in% c("Female Characters", "Male Characters")) 
+```
+
+
+#Female vs Male characters over time
+
+According to these figures, Dc company had more intensive appearence of male characters before 1950, after that year it seems like different types of "SEX" started to appear.Besides, early on there were more male characters than female but according to this data after the 90' female characters showed to be higher or similar in number of appareces than male.For the Marvel company, female characters had more appareces in ealies 50' however after that period of time, male characters started to appear more. Also, the diversity in Sex seemed to be higher for Marvel company than DC. Independly of the company, characters's sex quantities of appearences decreased over time. Interestingly, the number of female characters over time in both DC and Marvel has almost doubled after 1950.
+ 
+
+```{r}
+#csex<- count(master, c("publisher","YEAR", "SEX")) ##Using this line of code it worked at some point but after loading dplyr doenst work anymore.Next lines of code seem to do a better job. 
+
+```
+```{r}
+csex<- master %>% 
+  group_by(publisher, YEAR, SEX) %>%
+  summarise(freq = length(SEX))
+
+```
+
+
+```{r, echo=FALSE}
+ggplot(csex, aes(x=YEAR, y= freq, fill=SEX))+ geom_bar(stat="identity", position="dodge")+ facet_wrap(~publisher) +ylim(0,350)+
+       labs(x="Year", y="Frequency") + facet_wrap(~ publisher)+
+       theme(axis.title.x = element_text(size=18,vjust=-0.5),
+        axis.title.y = element_text(size=18,angle=90, vjust=1.2),
+        axis.text.x = element_text(colour="black", size=12),
+        axis.text.y = element_text(colour="black", size=12),
+        legend.text =element_text(size=10),
+        strip.text = element_text(size = 15))
+
+```
+
+
+
+
+```{r}
+sub_csex<- sub_master %>% 
+  group_by(publisher, YEAR, SEX) %>%
+  summarise(freq = length(SEX))
+
+```
+
+
+Looking only at Female and Male gender
+
+```{r, echo=FALSE}
+ggplot(sub_csex, aes(x=YEAR, y= freq, fill=SEX))+ geom_bar(stat="identity", position="dodge")+ facet_wrap(~publisher) +ylim(0,350)+
+       labs(x="Year", y="Frequency") + facet_wrap(~ publisher)+
+       theme(axis.title.x = element_text(size=18,vjust=-0.5),
+        axis.title.y = element_text(size=18,angle=90, vjust=1.2),
+        axis.text.x = element_text(colour="black", size=12),
+        axis.text.y = element_text(colour="black", size=12),
+        legend.text =element_text(size=10),
+        strip.text = element_text(size = 15))
+
+```
+
+
+##Appearances vs time for Maverl and DC
+
+```{r, echo=FALSE}
+ggplot(sub_master, aes(x=YEAR, y=APPEARANCES, fill=SEX))+ geom_bar(stat="identity", position="dodge")+
+       labs(x="Year", y="Appearances") + facet_wrap(~ publisher)+
+       theme(axis.title.x = element_text(size=18,vjust=-0.5),
+        axis.title.y = element_text(size=18,angle=90, vjust=1.2),
+        axis.text.x = element_text(colour="black", size=12),
+        axis.text.y = element_text(colour="black", size=12),
+        legend.text =element_text(size=10),
+        strip.text = element_text(size = 15))
+
+```
+
+
+
+##How is the align related with the gender? 
+
+According to the data Females present 43% and 27% of Good and bad characters, respectively. On the other hand, Males showed exactly the opposite trents having more frequency of bad characters. Looking at the frequency of female and males within align and years, we can see that differences in align were notorious after 1960. Apparently, good characters tended to increse over time but overall bad male characters were predominant.    
+
+```{r}
+res2<-sub_master %>%
+  group_by(SEX, ALIGN) %>%
+  summarise(Count= length(SEX))
+```
+
+
+```{r, echo=TRUE}
+knitr::kable(res2)
+```
+
+
+
+```{r}
+calign<- sub_master %>% 
+  group_by(YEAR, SEX, ALIGN) %>%
+  summarise(freq = length(SEX))
+```
+
+```{r}
+ggplot(calign, aes(x=YEAR, y=freq)) + geom_line(aes(color=SEX)) + labs(y= "Frequency", x= "Year")+ facet_wrap(~ALIGN)
 ```
 
 ## Are gender and appearences related?
