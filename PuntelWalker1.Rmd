@@ -1,0 +1,71 @@
+---
+title: 'HW3: Elektra vs. Catwoman, a.k.a. Gender in Comics'
+author: "Laila Puntel and Victoria Walker"
+date: "October 14, 2016"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Prompt
+
+![](images/DC_Versus_Marvel_1.jpg)
+
+You are going to look into the raw data behind the story [Comic Books Are Still Made By Men, For Men And About Men](http://fivethirtyeight.com/features/women-in-comic-books/). 
+
+The data come from [Marvel Wikia](http://marvel.wikia.com/Main_Page) and [DC Wikia](http://dc.wikia.com/wiki/Main_Page). Characters were scraped on August 24. Appearance counts were scraped on September 2. The month and year of the first issue each character appeared in was pulled on October 6.
+
+
+
+- Is there any pattern around gender in the characters of comics?
+- Is there any change over time?
+- Does the company (DC vs. Marvel) have and effect?
+- What can you say about "good characters" vs. "villains" in regards to their characteristics, gender, the company, over time?
+
+```{r}
+#load required packages
+library(ggplot2)
+```
+
+## Read in data
+
+The first step is to read in the Marvel and DC data and combine into a single data frame. Code is run with the working directory as the project (HW3) base folder.
+
+```{r}
+marvel<-read.csv("data/marvel-wikia-data.csv") #Read Marvel data
+dc<-read.csv("data/dc-wikia-data.csv") #Read DC data
+colnames(marvel)[13]<-"YEAR" #Change last column to YEAR in Marvel to match YEAR in DC
+dc$publisher<-"DC" #Add publisher col
+marvel$publisher<-"Marvel" #Add publisher col
+master<-rbind(dc, marvel) #Bind both tables into one data frame
+```
+
+## Are gender and appearences related?
+
+One pattern around gender that could be interesting is how frequently different genders appear. As the characters have been released for varying amounts of time the number of appearances will be normalized by how long they've been in the comics. The current year (2016) will be used to calculate years since a character's first appearance.
+
+```{r}
+norm<-master$APPEARANCES/(2016-master$YEAR)
+
+sc<-qplot(master$SEX[master$SEX!=""], norm[master$SEX!=""], color=master$SEX[master$SEX!=""],
+      xlab="Gender", ylab="Normalized Appearances")
+sc + theme(axis.ticks = element_blank(), axis.text.x = element_blank(), legend.title=element_blank())
+```
+
+When normalized to the date of their first appearances, male characters appear most in the comics. This index highlights predominant characters as outliers. The majority of characters appear infrequently, regardless of gender. These are likely characters who serve a minor role in only a few (or a single) comic.
+
+## Secret vs. Public Identities
+
+Do heroes and villains differ in how many have kept their identity secret? 
+
+```{r}
+align<-master$ALIGN[master$ALIGN=="Good Characters"&master$ID!=""|master$ALIGN=="Bad Characters"&master$ID!=""]
+id<-master$ID[master$ALIGN=="Good Characters"&master$ID!=""|master$ALIGN=="Bad Characters"&master$ID!=""]
+             
+sp<-ggplot(data=NULL, aes(x=align, fill=id)) +
+    geom_bar(stat="count", position=position_dodge()) +
+    xlab("Alignment") + ylab("Number of Characters")
+sp + theme(legend.title=element_blank())
+```
+
+Bad characters are twice as likely to have a secret identity than a public identity. In contrast, good characters are slightly more likely to have a public identity than a secret one.
