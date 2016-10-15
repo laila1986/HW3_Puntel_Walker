@@ -53,3 +53,19 @@ sc + theme(axis.ticks = element_blank(), axis.text.x = element_blank(), legend.t
 ```
 
 When normalized to the date of their first appearances, male characters appear most in the comics. This index highlights predominant characters as outliers. The majority of characters appear infrequently, regardless of gender. These are likely characters who serve a minor role in only a few (or a single) comic.
+
+## Secret vs. Public Identities
+
+Do heroes and villains differ in how many have kept their identity secret? 
+
+```{r}
+align<-df$ALIGN[df$ALIGN=="Good Characters"&df$ID!=""|df$ALIGN=="Bad Characters"&df$ID!=""]
+id<-df$ID[df$ALIGN=="Good Characters"&df$ID!=""|df$ALIGN=="Bad Characters"&df$ID!=""]
+             
+sp<-ggplot(data=NULL, aes(x=align, fill=id)) +
+    geom_bar(stat="count", position=position_dodge()) +
+    xlab("Alignment") + ylab("Number of Characters")
+sp + theme(legend.title=element_blank())
+```
+
+Bad characters are twice as likely to have a secret identity than a public identity. In contrast, good characters are slightly more likely to have a public identity than a secret one.
